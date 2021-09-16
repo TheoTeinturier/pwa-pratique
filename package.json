@@ -1,0 +1,22 @@
+{
+  "name": "pwa-pratique",
+  "version": "1.0.0",
+  "description": "Cours pwa\r ## Mise à jour",
+  "main": "index.js",
+  "scripts": {
+    "jsonserver": "json-server -p 3001 --watch db.json",
+    "start": "live-server --port=3000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheoTeinturier/pwa-pratique.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TheoTeinturier/pwa-pratique/issues"
+  },
+  "homepage": "https://github.com/TheoTeinturier/pwa-pratique#readme"
+}
