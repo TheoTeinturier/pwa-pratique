@@ -1,12 +1,16 @@
 console.log("hello depuis le service worker");
 	
-const cacheName = 'veille-techno' + '1.2';
- 
+const cacheName = 'veille-techno' + '1.3';
+self.importScripts('idb/idb.js', 'idb/database.js'); 
+
+
 self.addEventListener('install', (evt) => {
     console.log(`sw installé à ${new Date().toLocaleTimeString()}`);
  
     const cachePromise = caches.open(cacheName).then(cache => {
         return cache.addAll([
+            'idb/idb.js',
+            'idb/database.js',
             'index.html',
             'main.js',
             'style.css',
@@ -44,19 +48,23 @@ self.addEventListener('fetch', (evt) => {
     console.log('sw intercepte la requête suivante via fetch', evt);
     console.log('url interceptée', evt.request.url);
 });
-self.addEventListener('fetch', (evt) => {
-    if(!navigator.onLine) {
-        const headers = { headers: { 'Content-Type': 'text/html;charset=utf-8'} };
-        evt.respondWith(new Response('<h1>Pas de connexion internet</h1><div>Application en mode dégradé. Veuillez vous connecter</div>', headers));
-    }
+// self.addEventListener('fetch', (evt) => {
+//     if(!navigator.onLine) {
+//         const headers = { headers: { 'Content-Type': 'text/html;charset=utf-8'} };
+//         evt.respondWith(new Response('<h1>Pas de connexion internet</h1><div>Application en mode dégradé. Veuillez vous connecter</div>', headers));
+//     }
  
-    console.log('sw intercepte la requête suivante via fetch', evt);
-    console.log('url interceptée', evt.request.url);
-});
+//     console.log('sw intercepte la requête suivante via fetch', evt);
+//     console.log('url interceptée', evt.request.url);
+// });
 
 	
 //..
 self.addEventListener('fetch', (evt) => {
+
+    if(evt.request.method === 'POST') {
+        return;
+    }
 
     // 5.3 Stratégie de network first with cache fallback
     // On doit envoyer une réponse
@@ -75,6 +83,8 @@ self.addEventListener('fetch', (evt) => {
             return caches.match(evt.request);
         })
     );
+
+    
 
     	
 // // 7.3 Notifications persistantes (envoyées depuis le service worker)
@@ -170,3 +180,47 @@ self.addEventListener("push", evt => {
     };
     self.registration.showNotification(title, objNotification);
 })
+
+self.addEventListener('sync', event => {
+    console.log('sync event', event);
+    // test du tag de synchronisation utilisé dans add_techno
+    if (event.tag === 'sync-technos') {
+        console.log('syncing', event.tag);
+        // Utilisation de waitUntil pour s'assurer que le code est exécuté (Attend une promise)
+        event.waitUntil(updateTechnoPromise);
+    }
+})
+ 
+// 9.6 Synchroniser les données au retour de la connexion
+// constante de la Promise permettant de faire la synchronisation
+const updateTechnoPromise = new Promise(function(resolve, reject) {
+ 
+    // récupération de la liste des technos de indexedDB
+    getAllTechnos().then(technos => {
+        console.log('got technos from sync callback', technos);
+        
+        // pour chaque item : appel de l'api pour l'ajouter à la base
+        technos.map(techno => {
+            console.log('Attempting fetch', techno);
+            fetch('https://us-central1-pwa-technos-teinturier.cloudfunctions.net/addTechno', {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(techno)
+            })
+            .then(() => {
+                // Succès : suppression de l'item en local si ajouté en distant
+                console.log('Success update et id supprimée', techno.id);
+                return deleteTechno(techno.id);
+            })
+            .catch(err => {
+                // Erreur
+                console.log('Error update et id supprimée', err);
+                resolve(err);
+            })
+        })
+ 
+    })
+});
