@@ -29,6 +29,49 @@ if(navigator.serviceWorker) {
         .catch(err => console.error('service worker NON enregistré', err));
 }
 
+	
+if(window.Notification && window.Notification !== "denied"){
+    // demande une permission
+    Notification.requestPermission(perm => {
+        // vérifie si la permission est acceptée par l'utilisateur
+        // 3 valeurs possibles : default | granted | denied
+        if(perm === "granted"){
+          	console.log("Notification acceptée");
+            // On crée une nouvelle notification
+            const notif = new Notification("Hello notification");
+        }
+        else{
+            // Notification refusée
+            console.log("Notification refusée");
+        }
+    })
+}
+	
+/*if(window.Notification && window.Notification !== "denied"){
+    // demande une permission
+    Notification.requestPermission(perm => {
+        // vérifie si la permission est acceptée par l'utilisateur
+        // 3 valeurs possibles : default | granted | denied
+        if(perm === "granted"){
+            
+            // 7.2 Option de la notification
+            const options = {
+                body : "Body de la notification",
+                icon : "images/icons/icon-72x72.png"
+            }
+ 
+            // On crée une nouvelle notification
+            // 7.2 On passe les options en deuxième argument
+            const notif = new Notification("Hello notification", options);
+          
+        }
+        else{
+            // Notification refusée
+            console.log("Notification refusée");
+        }
+    })
+}
+*/
 
 // if(window.caches) {
 //     caches.open('veille-techno-1.0');

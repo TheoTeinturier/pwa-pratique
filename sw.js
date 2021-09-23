@@ -75,6 +75,35 @@ self.addEventListener('fetch', (evt) => {
             return caches.match(evt.request);
         })
     );
+
+    	
+	
+// 7.3 Notifications persistantes (envoyées depuis le service worker)
+self.registration.showNotification("Notification du SW", {
+    body:"je suis une notification dite persistante",
+  
+    // 7.4 Options de notifications grâce aux actions
+    actions:[
+        {action:"accept", title:"accepter"},
+        {action: "refuse", title: "refuser"}
+    ]
+})
+ 
+// 7.4 Options de notifications grâce aux actions
+// Ecouteur au clic d'un des deux boutons de la notification
+self.addEventListener("notificationclick", evt => {
+    console.log("notificationclick evt", evt);
+    if(evt.action === "accept"){
+        console.log("vous avez accepté");
+    } else if(evt.action === "refuse"){
+        console.log("vous avez refusé");
+    } else{
+        console.log("vous avez cliqué sur la notification (pas sur un bouton)");
+    }
+    evt.notification.close();
+})
+
+
     
 
     // if(!navigator.onLine) {
